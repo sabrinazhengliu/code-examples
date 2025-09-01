@@ -63,14 +63,14 @@ $$;
 
 SELECT UDF_FLATTEN_JSON(PARSE_JSON(
   '{
-    "name": "Alice",           -- level 1 json key
+    "name": "Alice",
     "address": {
-      "street": "Main St",     -- level 2 json key
+      "street": "Main St",
       "city": "Anytown"
     },
-    "phones": [                -- level 2 array index
+    "phones": [
       {
-        "type": "home",        -- level 3 json key
+        "type": "home",
         "number": "123-456-7890"
       },
       {
