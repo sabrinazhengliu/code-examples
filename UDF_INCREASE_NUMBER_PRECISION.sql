@@ -1,7 +1,7 @@
-CREATE OR REPLACE FUNCTION udf_increase_number_precision(event_schema ARRAY)
+CREATE OR REPLACE FUNCTION UDF_INCREASE_NUMBER_PRECISION(event_schema ARRAY)
 RETURNS ARRAY
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.9'
+RUNTIME_VERSION = '3.10'
 HANDLER = 'increase_precision'
 AS $$
 def increase_precision(event_schema: list) -> list:
@@ -20,7 +20,7 @@ def increase_precision(event_schema: list) -> list:
     ]
 $$;
 
-select udf_increase_number_precision([
+select UDF_INCREASE_NUMBER_PRECISION([
   PARSE_JSON('{"COLUMN_NAME": "c1", "TYPE": "NUMBER(8, 6)"}')
 , PARSE_JSON('{"COLUMN_NAME": "c2", "TYPE": "TEXT"}')
 ])
