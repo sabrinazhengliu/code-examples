@@ -164,8 +164,6 @@ RUNTIME_VERSION = '3.9' -- Or your desired Python version
 HANDLER = 'mask_data'
 AS
 $$
-import json
-
 def mask_data(variant_data: dict, keys_to_mask: list):
     masked_data = variant_data.copy()
     for json_path in keys_to_mask:
@@ -173,8 +171,6 @@ def mask_data(variant_data: dict, keys_to_mask: list):
         for i, part in enumerate(parts):
             if i == len(parts) - 1:
                 masked_data[part] = '***'
-            else:
-                masked_data = masked_data.setdefault(part, {})
     return masked_data
 $$;
 
