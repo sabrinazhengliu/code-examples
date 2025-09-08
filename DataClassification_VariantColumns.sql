@@ -160,7 +160,7 @@ CREATE OR REPLACE FUNCTION udf_mask_variant_keys(
 )
 RETURNS VARIANT
 LANGUAGE PYTHON
-RUNTIME_VERSION = '3.9' -- Or your desired Python version
+RUNTIME_VERSION = '3.10'
 HANDLER = 'mask_data'
 AS
 $$
