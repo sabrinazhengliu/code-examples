@@ -123,7 +123,7 @@ SELECT
 ;
 SELECT * FROM DATA_CLASSIFICATION_RESULTS;
 
--- step 5: create a record table for JSON paths that requires tagging
+-- step 5: create a record table for columns to be masked
 CREATE OR REPLACE TEMP TABLE SENSITIVE_DATA_COLUMNS
 AS
 WITH results AS (
