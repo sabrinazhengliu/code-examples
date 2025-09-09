@@ -27,7 +27,6 @@ CREATE OR REPLACE TEMP VIEW V1
 AS
 SELECT
   VALUE:"name"::varchar as "name"
-, VALUE:"id_number"::INTEGER as "id_number"
 , VALUE:"email"::varchar as "email"
 , VALUE:"address"."city"::varchar as "address.city"
 , VALUE:"address"."street"::varchar as "address.street"
