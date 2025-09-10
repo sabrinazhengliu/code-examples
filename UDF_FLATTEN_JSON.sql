@@ -98,6 +98,7 @@ function flatten(obj, prefix = '') {
                       // Use toFixed to format the number to the specified decimal places
                       // toFixed returns a string, so convert it back to a number if needed
                       value = parseFloat(value.toFixed(10));
+                  }
                 result[newKey] = value;
             }
         }
