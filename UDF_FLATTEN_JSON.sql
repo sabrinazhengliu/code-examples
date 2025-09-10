@@ -5,7 +5,7 @@ RUNTIME_VERSION = '3.10'
 HANDLER = 'flatten_json'
 AS
 $$
-import json
+from decimal import Decimal
 
 def flatten_json(json_data):
     try:
@@ -30,6 +30,8 @@ def flatten_json_recursive(obj, prefix=''):
                     else:
                         flat_dict[list_key] = item
             else:
+                if isinstance(value, float):    # without this step, float values will be inferred as TEXT
+                    value = Decimal(str(value))
                 flat_dict[new_key] = value
     elif isinstance(obj, list):
         # If the top level is a list, treat each element as a separate item to flatten
