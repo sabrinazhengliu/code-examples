@@ -63,3 +63,43 @@ SELECT UDF_FLATTEN_JSON(PARSE_JSON(
     ]
   }'
 )) AS flattened_data;
+
+
+CREATE OR REPLACE FUNCTION FLATTEN_JSON_UDF(OBJ VARIANT)
+RETURNS VARIANT
+LANGUAGE JAVASCRIPT
+AS
+$$
+function flatten(obj, prefix = '') {
+    let result = {};
+
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            const newKey = prefix ? `${prefix}.${key}` : key;
+            const value = obj[key];
+
+            if (typeof value === 'object' && value !== null) {
+                if (Array.isArray(value)) {
+                    // Handle arrays by flattening each element
+                    value.forEach((item, index) => {
+                        if (typeof item === 'object' && item !== null) {
+                            Object.assign(result, flatten(item, `${newKey}[${index}]`));
+                        } else {
+                            result[`${newKey}[${index}]`] = item;
+                        }
+                    });
+                } else {
+                    // Recursively flatten nested objects
+                    Object.assign(result, flatten(value, newKey));
+                }
+            } else {
+                // Add primitive values directly
+                result[newKey] = value;
+            }
+        }
+    }
+    return result;
+}
+
+return flatten(OBJ);
+$$;
