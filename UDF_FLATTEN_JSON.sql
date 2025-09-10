@@ -94,6 +94,10 @@ function flatten(obj, prefix = '') {
                 }
             } else {
                 // Add primitive values directly
+                  if (typeof value === 'number' && !Number.isInteger(value)) {
+                      // Use toFixed to format the number to the specified decimal places
+                      // toFixed returns a string, so convert it back to a number if needed
+                      value = parseFloat(value.toFixed(10));
                 result[newKey] = value;
             }
         }
