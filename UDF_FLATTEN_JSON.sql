@@ -30,8 +30,6 @@ def flatten_json_recursive(obj, prefix=''):
                     else:
                         flat_dict[list_key] = item
             else:
-                if isinstance(value, float):    # without this step, float values will be inferred as TEXT
-                    value = Decimal(str(value))
                 flat_dict[new_key] = value
     elif isinstance(obj, list):
         # If the top level is a list, treat each element as a separate item to flatten
@@ -63,3 +61,26 @@ SELECT UDF_FLATTEN_JSON(PARSE_JSON(
     ]
   }'
 )) AS flattened_data;
+
+-- important! Python JSONDecoder doesn't support Decimal data type
+-- write a SQL UDF to covnert all floats into decimals
+
+CREATE OR REPLACE FUNCTION UDF_CONVERT_JSON_FLOATS_TO_DECIMAL(json_input VARIANT)
+RETURNS VARIANT
+AS
+$$
+    SELECT OBJECT_AGG(
+        key::STRING,
+        CASE
+            WHEN IS_REAL(value) THEN TRY_TO_DECIMAL(value::STRING, 38, 9)
+            ELSE value
+        END
+    )::VARIANT
+    FROM TABLE(FLATTEN(INPUT => json_input))
+$$;
+
+SELECT
+  PARSE_JSON('{"float": 1.234,}') AS json_data
+, UDF_FLATTEN_JSON(json_data) as flattened_json
+, UDF_CONVERT_JSON_FLOATS_TO_DECIMAL(flattened_json) AS decimal_json
+;
