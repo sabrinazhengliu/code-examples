@@ -84,3 +84,49 @@ SELECT
 , UDF_FLATTEN_JSON(json_data) as flattened_json
 , UDF_CONVERT_JSON_FLOATS_TO_DECIMAL(flattened_json) AS decimal_json
 ;
+
+CREATE OR REPLACE FUNCTION UDF_JSON_FLOAT_TO_DECIMAL(json_data VARIANT)
+RETURNS VARCHAR
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+HANDLER = 'convert_float_to_decimal'
+AS
+$$
+import re
+
+def merge_json_keys(json_keys: list) -> list:
+    return_list = set([
+        re.sub(r"\[\d+\]", "[0]", key)
+        if "[" in key
+        else key
+        for key in json_keys
+    ])
+    root_list = []
+    for key in return_list:
+        if "[0]" in key:
+            root = key.split("[0]", 1)[0]
+            root_list.append(root)
+    for key in set(root_list):
+        return_list.discard(key)
+    return sorted(list(return_list))
+
+def convert_float_to_decimal(json_data: dict) -> str:
+    keep_keys = merge_json_keys(json_data.keys())
+
+    def mapper(key: str) -> str:
+        data = f"EVENT_PAYLOAD:{key}"
+        stmt = f"'{key}', CASE WHEN IS_REAL({data}) THEN TO_DECIMAL({data}, 38, 9) ELSE {data} END"
+        return stmt
+
+    query = """
+    CREATE OR REPLACE TEMP TABLE SAMPLE_PAYLOAD_REDUCED
+    AS
+    SELECT OBJECT_CONSTRUCT(\n"""
+    query += "\n,".join([mapper(key) for key in keep_keys])
+    query += """
+    ) AS EVENT_PAYLOAD 
+    FROM SAMPLE_PAYLOAD
+    """
+    return query
+
+$$;
