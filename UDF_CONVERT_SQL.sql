@@ -37,7 +37,7 @@ def format_sql(input_str, preserve_case):
 
     # Standard Snowflake/SQL Data Types
     DATA_TYPES = {
-        "STRING", "TEXT", "VARCHAR", "CHAR", "NUMBER", "INT", "INTEGER",
+        "STRING", "TEXT", "VARCHAR", "CHAR", "NUMBER", "INT", "INTEGER", "BIGINT", 
         "FLOAT", "DOUBLE", "BOOLEAN", "BOOL", "DATE", "TIMESTAMP", "TIMESTAMP_NTZ",
         "TIMESTAMP_TZ", "TIMESTAMP_LTZ", "VARIANT", "OBJECT", "ARRAY", "GEOGRAPHY",
         "GEOMETRY", "BINARY"
