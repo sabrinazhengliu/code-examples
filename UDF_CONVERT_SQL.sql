@@ -30,7 +30,7 @@ def format_sql(input_str, preserve_case):
         "create", "or", "replace", "table", "view", "function", "procedure",
         "with", "as", "and", "or", "not", "in", "is", "null", "true", "false",
         "join", "left", "right", "inner", "outer", "on", "case", "when", "then",
-        "else", "end", "distinct", "union", "all", "cast", "try_cast"
+        "else", "end", "distinct", "union", "all", "cast", "try_cast", "external"
     }
     # Convert set to all upper for comparison
     KEYWORDS = {k.upper() for k in KEYWORDS}
