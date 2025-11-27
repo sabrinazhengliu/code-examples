@@ -1,9 +1,14 @@
+CREATE OR REPLACE FUNCTION UDF_PYSPARK_TO_SQL(INPUT_STR VARCHAR)
+RETURNS VARCHAR
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.12'
+HANDLER = 'pyspark_to_snowflake_ddl'
+AS 
+$$    
 import re
 import ast
 import sys
 
-# Note: In Snowflake, you must include 'sqlglot' in your packages list when registering the UDF.
-# packages=['snowflake-snowpark-python', 'sqlglot']
 import sqlglot
 from snowflake.snowpark.functions import udf
 from snowflake.snowpark.types import StringType
@@ -129,3 +134,4 @@ def pyspark_to_snowflake_ddl(pyspark_code: str, target_view_name: str) -> str:
 
     ddl = f'CREATE OR REPLACE VIEW "{target_view_name.upper()}" AS\n{snowflake_sql};'
     return ddl
+$$;
