@@ -2,13 +2,13 @@ CREATE OR REPLACE FUNCTION UDF_PYSPARK_TO_SQL(INPUT_STR VARCHAR)
 RETURNS VARCHAR
 LANGUAGE PYTHON
 RUNTIME_VERSION = '3.12'
+PACKAGES = ('sqlglot', 'snowflake-snowpark-python')
 HANDLER = 'pyspark_to_snowflake_ddl'
 AS 
 $$    
 import re
 import ast
 import sys
-
 import sqlglot
 from snowflake.snowpark.functions import udf
 from snowflake.snowpark.types import StringType
@@ -103,7 +103,7 @@ def transpile_sql(sql_code: str) -> str:
     except Exception as e:
         return f"Error transpiling SQL: {str(e)}"
 
-def pyspark_to_snowflake_ddl(pyspark_code: str, target_view_name: str) -> str:
+def pyspark_to_snowflake_ddl(pyspark_code: str) -> str:
     """
     Main UDF logic.
     1. Tries to find 'spark.sql(...)'.
@@ -132,6 +132,6 @@ def pyspark_to_snowflake_ddl(pyspark_code: str, target_view_name: str) -> str:
     if snowflake_sql.startswith("Error"):
         return f"-- {snowflake_sql}"
 
-    ddl = f'CREATE OR REPLACE VIEW "{target_view_name.upper()}" AS\n{snowflake_sql};'
+    ddl = f'CREATE OR REPLACE VIEW VW_NEW AS\n{snowflake_sql};'
     return ddl
 $$;
