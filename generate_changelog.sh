@@ -87,7 +87,7 @@ fi
 OUTPUT_PATH="${ORIGINAL_DIR}/${OUTPUT_FILE}"
 
 echo "databaseChangeLog" > "$OUTPUT_PATH"
-echo "  -id: release-${VERSION}" >> "$OUTPUT_PATH"
+echo "  - id: release-${VERSION}" >> "$OUTPUT_PATH"
 
 TODAY=$(date +%F)
 FOUND_COUNT=0
