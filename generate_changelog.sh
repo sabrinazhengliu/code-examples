@@ -3,20 +3,15 @@ chmod +x generate_changelog.sh
 ./generate_changelog.sh
 
 
-touch generate_changelog.sh
-chmod +x generate_changelog.sh
-./generate_changelog.sh
-
-
 #!/bin/bash
 
 # ==========================================
 # 1. Initialize Defaults
 # ==========================================
-VERSION="0.0.0"          # Default version
-INPUT_DIR="."            # Default input directory
-ROOT_NAME="default"      # Placeholder
-USER_PROVIDED_ROOT=false # Flag
+VERSION="0.0.0"
+INPUT_DIR="."
+# Default Root Name is the current directory name
+ROOT_NAME=$(basename "$(pwd)")
 
 HELP_TEXT="Usage: $0 [-v <version>] [-d <directory>] [-r <root_name>]"
 
@@ -30,7 +25,6 @@ while getopts "v:d:r:h" opt; do
     d) INPUT_DIR="$OPTARG"
     ;;
     r) ROOT_NAME="$OPTARG"
-       USER_PROVIDED_ROOT=true
     ;;
     h) echo "$HELP_TEXT"; exit 0
     ;;
@@ -44,26 +38,40 @@ OUTPUT_FILE="release-${VERSION}.yml"
 ORIGINAL_DIR=$(pwd)
 
 # ==========================================
-# 3. Calculate Relative Path (String Logic)
+# 3. Calculate Relative Path (Truncation Logic)
 # ==========================================
-# We derive the relative path from the string you passed to -d.
-# This happens BEFORE we cd into the directory.
 
-# Remove leading "./" if user typed it (e.g., ./src -> src)
-REL_PATH="${INPUT_DIR#./}"
+# We look for the ROOT_NAME inside the INPUT_DIR string.
+if [[ "$INPUT_DIR" == *"$ROOT_NAME"* ]]; then
+    # Logic: Remove everything from the start of the string 
+    # UP TO and INCLUDING the ROOT_NAME.
+    REL_PATH="${INPUT_DIR#*"$ROOT_NAME"}"
+else
+    # If ROOT_NAME is not found in the path, we assume the 
+    # user provided a path that is already relative to the root.
+    REL_PATH="$INPUT_DIR"
+fi
 
-# If the path is just "." (current dir), clear it so we don't print "changelog/root/./file"
+# --- Cleanup ---
+
+# 1. Remove leading slash (left over from truncation)
+REL_PATH="${REL_PATH#/}"
+
+# 2. Remove leading "./" (if user typed current dir)
+REL_PATH="${REL_PATH#./}"
+
+# 3. If REL_PATH is exactly ".", clear it (it means we are at the root)
 if [ "$REL_PATH" == "." ]; then
     REL_PATH=""
 fi
 
-# If REL_PATH is not empty and doesn't end with a slash, add one
+# 4. Add trailing slash if REL_PATH is not empty and missing one
 if [ -n "$REL_PATH" ] && [[ "$REL_PATH" != */ ]]; then
     REL_PATH="${REL_PATH}/"
 fi
 
 # ==========================================
-# 4. Setup Directory
+# 4. Process Directory
 # ==========================================
 
 if [ ! -d "$INPUT_DIR" ]; then
@@ -71,20 +79,11 @@ if [ ! -d "$INPUT_DIR" ]; then
     exit 1
 fi
 
-# Switch to the target directory to scan files
+# Switch to the target directory
 cd "$INPUT_DIR" || exit
 
 # ==========================================
-# 5. Determine Root Name
-# ==========================================
-
-# If user didn't provide -r, use the current folder name
-if [ "$USER_PROVIDED_ROOT" = false ]; then
-    ROOT_NAME=$(basename "$(pwd)")
-fi
-
-# ==========================================
-# 6. Generate Output
+# 5. Generate Output
 # ==========================================
 
 OUTPUT_PATH="${ORIGINAL_DIR}/${OUTPUT_FILE}"
@@ -96,8 +95,8 @@ TODAY=$(date +%F)
 FOUND_COUNT=0
 
 echo "Scanning '$INPUT_DIR'..."
-echo "Using Root Name: $ROOT_NAME"
-echo "Using Relative Path prefix: $REL_PATH"
+echo "Root Name: $ROOT_NAME"
+echo "Calculated Relative Path: $REL_PATH"
 
 # Loop through files
 for file in *; do
@@ -109,7 +108,7 @@ for file in *; do
         if [ "$FILE_DATE" == "$TODAY" ]; then
             echo "  - include:" >> "$OUTPUT_PATH"
             
-            # Format: changelog/<root_name>/<rel_path_from_args>/<filename>
+            # Format: changelog/<root_name>/<truncated_path>/<filename>
             FULL_LINE="        changelog/${ROOT_NAME}/${REL_PATH}${file}"
             
             echo "$FULL_LINE" >> "$OUTPUT_PATH"
