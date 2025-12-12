@@ -89,7 +89,7 @@ cd "$INPUT_DIR" || exit
 OUTPUT_PATH="${ORIGINAL_DIR}/${OUTPUT_FILE}"
 
 echo "databaseChangeLog:" > "$OUTPUT_PATH"
-echo "  -id: release-${VERSION}" >> "$OUTPUT_PATH"
+echo "  - id: release-${VERSION}" >> "$OUTPUT_PATH"
 
 TODAY=$(date +%F)
 FOUND_COUNT=0
@@ -109,7 +109,7 @@ for file in *; do
             echo "  - include:" >> "$OUTPUT_PATH"
             
             # Format: changelog/<root_name>/<truncated_path>/<filename>
-            FULL_LINE="        changelog/${ROOT_NAME}/${REL_PATH}${file}"
+            FULL_LINE="        file: changelog/${ROOT_NAME}/${REL_PATH}${file}"
             
             echo "$FULL_LINE" >> "$OUTPUT_PATH"
             ((FOUND_COUNT++))
