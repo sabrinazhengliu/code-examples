@@ -86,7 +86,7 @@ fi
 # Define where to write the file (back in the folder where script was run)
 OUTPUT_PATH="${ORIGINAL_DIR}/${OUTPUT_FILE}"
 
-echo "databaseChangeLog" > "$OUTPUT_PATH"
+echo "databaseChangeLog:" > "$OUTPUT_PATH"
 echo "  - id: release-${VERSION}" >> "$OUTPUT_PATH"
 
 TODAY=$(date +%F)
@@ -104,7 +104,7 @@ for file in *; do
 
         # Compare dates
         if [ "$FILE_DATE" == "$TODAY" ]; then
-            echo "  - include:" >> "$OUTPUT_PATH"
+            echo "  - include:"
             
             # Construct path: changelog/<root>/<rel_path>/<filename>
             FULL_LINE="        changelog/${REPO_ROOT}/${REL_PATH}${file}"
