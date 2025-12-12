@@ -104,7 +104,7 @@ for file in *; do
 
         # Compare dates
         if [ "$FILE_DATE" == "$TODAY" ]; then
-            echo "  - include:"
+            echo "  - include:" >> "$OUTPUT_PATH"
             
             # Construct path: changelog/<root>/<rel_path>/<filename>
             FULL_LINE="        changelog/${REPO_ROOT}/${REL_PATH}${file}"
