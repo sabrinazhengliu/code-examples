@@ -3,7 +3,6 @@ chmod +x generate_changelog.sh
 ./generate_changelog.sh
 
 
-
 #!/bin/bash
 
 # ==========================================
@@ -11,10 +10,8 @@ chmod +x generate_changelog.sh
 # ==========================================
 VERSION="0.0.0"          # Default version
 INPUT_DIR="."            # Default input directory
-ROOT_NAME="default"      # Placeholder (will be set to folder name if not provided)
-
-# We use a flag to track if the user actually passed a root name
-USER_PROVIDED_ROOT=false
+ROOT_NAME="default"      # Placeholder
+USER_PROVIDED_ROOT=false # Flag
 
 HELP_TEXT="Usage: $0 [-v <version>] [-d <directory>] [-r <root_name>]"
 
@@ -37,51 +34,56 @@ while getopts "v:d:r:h" opt; do
   esac
 done
 
-# Define output filename
+# Output filename
 OUTPUT_FILE="release-${VERSION}.yml"
-
-# Save the original directory to write the output file there later
 ORIGINAL_DIR=$(pwd)
 
 # ==========================================
-# 3. Setup Directory
+# 3. Calculate Relative Path (String Logic)
+# ==========================================
+# We derive the relative path from the string you passed to -d.
+# This happens BEFORE we cd into the directory.
+
+# Remove leading "./" if user typed it (e.g., ./src -> src)
+REL_PATH="${INPUT_DIR#./}"
+
+# If the path is just "." (current dir), clear it so we don't print "changelog/root/./file"
+if [ "$REL_PATH" == "." ]; then
+    REL_PATH=""
+fi
+
+# If REL_PATH is not empty and doesn't end with a slash, add one
+if [ -n "$REL_PATH" ] && [[ "$REL_PATH" != */ ]]; then
+    REL_PATH="${REL_PATH}/"
+fi
+
+# ==========================================
+# 4. Setup Directory
 # ==========================================
 
-# Check if input directory exists
 if [ ! -d "$INPUT_DIR" ]; then
     echo "Error: Directory '$INPUT_DIR' does not exist."
     exit 1
 fi
 
-# Switch context to the target directory
+# Switch to the target directory to scan files
 cd "$INPUT_DIR" || exit
 
 # ==========================================
-# 4. Determine Root Name and Path
+# 5. Determine Root Name
 # ==========================================
 
-# --- Logic for Root Name (Static/Manual only) ---
-# If the user did NOT provide -r, default to current directory name
+# If user didn't provide -r, use the current folder name
 if [ "$USER_PROVIDED_ROOT" = false ]; then
     ROOT_NAME=$(basename "$(pwd)")
 fi
 
-# --- Logic for Relative Path ---
-# We still check git for the *path* structure to keep the changelog path accurate,
-# but we do not use git for the root name.
-REL_PATH=""
-if git rev-parse --git-dir > /dev/null 2>&1; then
-    # If inside git, get path relative to the git root
-    REL_PATH=$(git rev-parse --show-prefix)
-fi
-
 # ==========================================
-# 5. Generate Output File
+# 6. Generate Output
 # ==========================================
 
 OUTPUT_PATH="${ORIGINAL_DIR}/${OUTPUT_FILE}"
 
-# Write Header
 echo "databaseChangeLog" > "$OUTPUT_PATH"
 echo "  -id: release-${VERSION}" >> "$OUTPUT_PATH"
 
@@ -90,6 +92,7 @@ FOUND_COUNT=0
 
 echo "Scanning '$INPUT_DIR'..."
 echo "Using Root Name: $ROOT_NAME"
+echo "Using Relative Path prefix: $REL_PATH"
 
 # Loop through files
 for file in *; do
@@ -101,7 +104,7 @@ for file in *; do
         if [ "$FILE_DATE" == "$TODAY" ]; then
             echo "  - include:" >> "$OUTPUT_PATH"
             
-            # Format: changelog/<root_name>/<rel_path>/<filename>
+            # Format: changelog/<root_name>/<rel_path_from_args>/<filename>
             FULL_LINE="        changelog/${ROOT_NAME}/${REL_PATH}${file}"
             
             echo "$FULL_LINE" >> "$OUTPUT_PATH"
