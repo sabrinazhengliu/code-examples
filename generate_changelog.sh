@@ -3,6 +3,11 @@ chmod +x generate_changelog.sh
 ./generate_changelog.sh
 
 
+touch generate_changelog.sh
+chmod +x generate_changelog.sh
+./generate_changelog.sh
+
+
 #!/bin/bash
 
 # ==========================================
