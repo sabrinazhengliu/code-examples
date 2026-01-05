@@ -351,9 +351,11 @@ snow sql -q "ALTER GIT REPOSITORY $SNOWFLAKE_GIT_REPO FETCH" -x
 
 # Test notebook execution
 snow git execute "@$SNOWFLAKE_GIT_REPO/branches/main/notebooks/analysis.ipynb" -x
+```
 
 Step 13: Push and Monitor
 --------------------------
+```
 # Add workflow file
 git add .github/workflows/test-notebooks.yml
 
@@ -363,7 +365,8 @@ git commit -m "Add GitHub Actions workflow for notebook testing"
 # Push to trigger workflow
 git push origin main
 ```
-# Monitor workflow
+
+#### Monitor workflow
 Go to: https://github.com/your-org/your-project/actions
 
 Step 14: Troubleshooting
