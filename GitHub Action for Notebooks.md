@@ -181,14 +181,17 @@ Step 9: Repository Structure
 Ensure your repository has this structure:
 
 ```
-your-project/
-├── .github/
-│   └── workflows/
-│       └── test-notebooks.yml
-├── notebooks/
-│   ├── analysis.ipynb
-│   ├── etl_pipeline.ipynb
-│   └── data_processing.ipynb
+your-repo/                                                                                                                                                                 
+├── notebooks/                                                                                                                                                             
+│   ├── ANALYSIS/                    ← Folder per notebook                                                                                                                 
+│   │   ├── notebook.ipynb                                                                                                                                                 
+│   │   └── metadata.json                                                                                                                                                  
+│   ├── ETL_PIPELINE/                ← Another folder                                                                                                                      
+│   │   ├── notebook.ipynb
+│   │   └── metadata.json                                                                                                                                                  
+│   └── DATA_PROCESSING/                                                                                                                                                   
+│       ├── notebook.ipynb                                                                                                                                                 
+│       └── metadata.json                     
 └── README.md
 ```
 
@@ -293,8 +296,8 @@ jobs:
             echo "=========================================="
             echo "Executing: $notebook"
             echo "=========================================="
-            
-            if snow git execute "@$SNOWFLAKE_GIT_REPO/branches/main/notebooks/${notebook}.ipynb" \
+
+            if snow sql -q "EXECUTE NOTEBOOK ${notebook}"
               --database "$SNOWFLAKE_DATABASE" \
               --schema "$SNOWFLAKE_SCHEMA" \
               --warehouse "$SNOWFLAKE_WAREHOUSE" \
