@@ -180,6 +180,7 @@ Step 9: Repository Structure
 -----------------------------
 Ensure your repository has this structure:
 
+```
 your-project/
 ├── .github/
 │   └── workflows/
@@ -189,6 +190,7 @@ your-project/
 │   ├── etl_pipeline.ipynb
 │   └── data_processing.ipynb
 └── README.md
+```
 
 Step 10: Configure GitHub Secrets
 ----------------------------------
@@ -196,26 +198,26 @@ Step 10: Configure GitHub Secrets
 2. Click "New repository secret"
 3. Add the following secrets:
 
-Secret Name: SNOWFLAKE_ACCOUNT
-Value: abc12345.us-east-1
+* Secret Name: SNOWFLAKE_ACCOUNT
+   * Value: abc12345.us-east-1
 
-Secret Name: SNOWFLAKE_USER
-Value: github_actions_user
+* Secret Name: SNOWFLAKE_USER
+   * Value: github_actions_user
 
-Secret Name: SNOWFLAKE_PRIVATE_KEY_RAW
-Value: (paste the private key string from Step 5 - without headers/newlines)
+* Secret Name: SNOWFLAKE_PRIVATE_KEY_RAW
+   * Value: (paste the private key string from Step 5 - without headers/newlines)
 
-Secret Name: SNOWFLAKE_DATABASE
-Value: MYDB
+* Secret Name: SNOWFLAKE_DATABASE
+   * Value: MYDB
 
-Secret Name: SNOWFLAKE_SCHEMA
-Value: PUBLIC
+* Secret Name: SNOWFLAKE_SCHEMA
+   * Value: PUBLIC
 
-Secret Name: SNOWFLAKE_WAREHOUSE
-Value: COMPUTE_WH
+* Secret Name: SNOWFLAKE_WAREHOUSE
+   * Value: COMPUTE_WH
 
-Secret Name: SNOWFLAKE_GIT_REPO
-Value: mydb.public.notebooks_repo
+* Secret Name: SNOWFLAKE_GIT_REPO
+   * Value: mydb.public.notebooks_repo
 
 Step 11: Create GitHub Actions Workflow
 ----------------------------------------
@@ -333,6 +335,7 @@ jobs:
 
 Step 12: Local Testing (Before Pushing)
 ----------------------------------------
+```
 # Set environment variables
 export SNOWFLAKE_ACCOUNT=abc12345.us-east-1
 export SNOWFLAKE_USER=github_actions_user
@@ -359,35 +362,35 @@ git commit -m "Add GitHub Actions workflow for notebook testing"
 
 # Push to trigger workflow
 git push origin main
-
+```
 # Monitor workflow
 Go to: https://github.com/your-org/your-project/actions
 
 Step 14: Troubleshooting
 -------------------------
-Issue: Authentication failed
-Solution: 
+* Issue: Authentication failed
+* Solution: 
   - Verify public key is set on user
   - Check private key in GitHub secrets has no headers/newlines
   - Run: DESC USER github_actions_user; (verify RSA_PUBLIC_KEY is set)
 
-Issue: Permission denied on Git repository
-Solution:
+* Issue: Permission denied on Git repository
+* Solution:
   - Check grants: SHOW GRANTS TO ROLE github_actions_role;
   - Grant READ access: GRANT READ ON GIT REPOSITORY mydb.public.notebooks_repo TO ROLE github_actions_role;
 
-Issue: Git repository not found
-Solution:
+* Issue: Git repository not found
+* Solution:
   - Verify repo exists: SHOW GIT REPOSITORIES;
   - Check spelling of SNOWFLAKE_GIT_REPO secret
 
-Issue: Notebook not found in Git repo
-Solution:
+* Issue: Notebook not found in Git repo
+* Solution:
   - List files: LS @mydb.public.notebooks_repo/branches/main/notebooks/;
   - Ensure path matches: @repo/branches/main/notebooks/file.ipynb
 
-Issue: Warehouse suspended
-Solution:
+* Issue: Warehouse suspended
+* Solution:
   - Add auto-resume: ALTER WAREHOUSE compute_wh SET AUTO_RESUME = TRUE;
   - Or resume manually: ALTER WAREHOUSE compute_wh RESUME;
 
@@ -395,6 +398,7 @@ Solution:
 
 Optional: Multiple Branches
 ----------------------------
+```
 # Execute from different branch
 snow git execute "@mydb.public.notebooks_repo/branches/develop/notebooks/analysis.ipynb" -x
 
@@ -410,18 +414,22 @@ snow git execute "@mydb.public.notebooks_repo/branches/main/notebooks/analysis.i
   --parameter "start_date=2024-01-01" \
   --parameter "end_date=2024-12-31" \
   -x
+```
 
 Optional: Scheduled Runs
 -------------------------
+```
 # Add to workflow to run on schedule
 on:
   schedule:
     - cron: '0 2 * * *'  # Daily at 2 AM UTC
   push:
     branches: [main]
+```
 
 Optional: Environment-Specific Workflows
 -----------------------------------------
+```yaml
 # Use different Git repos for dev/prod
 jobs:
   test-dev:
@@ -439,6 +447,7 @@ jobs:
         env:
           SNOWFLAKE_GIT_REPO: mydb.prod.notebooks_repo
         run: snow git execute "@$SNOWFLAKE_GIT_REPO/branches/main/notebooks/analysis.ipynb" -x
+```
 
 ## PART 5: VERIFICATION CHECKLIST
 
@@ -482,7 +491,7 @@ Benefits:
 
 
 ## QUICK REFERENCE COMMANDS
-
+```
 # Sync Git repository
 snow sql -q "ALTER GIT REPOSITORY mydb.public.notebooks_repo FETCH" -x
 
@@ -500,6 +509,7 @@ snow connection test -x
 
 # Check grants
 snow sql -q "SHOW GRANTS TO ROLE github_actions_role" -x
+```
 
 ## SUPPORT RESOURCES
 
