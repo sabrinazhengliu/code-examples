@@ -485,12 +485,12 @@ jobs:
 4. GIT REPOSITORY: Snowflake object that mirrors your GitHub repo
 5. WORKFLOW: Automated testing on every push to notebooks
 
-Benefits:
-✅ Single source of truth (GitHub)
-✅ Full version control history
-✅ Automatic testing on changes
-✅ No manual deployment needed
-✅ Secure authentication
+#### Benefits:
+* ✅ Single source of truth (GitHub)
+* ✅ Full version control history
+* ✅ Automatic testing on changes
+* ✅ No manual deployment needed
+* ✅ Secure authentication
 
 
 ## QUICK REFERENCE COMMANDS
