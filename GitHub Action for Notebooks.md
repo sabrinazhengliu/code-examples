@@ -454,27 +454,27 @@ jobs:
 
 ## PART 5: VERIFICATION CHECKLIST
 
-Snowflake Setup:
-  ☐ API integration created and enabled
-  ☐ GitHub secret created with PAT
-  ☐ Git repository created and fetched
-  ☐ Service account user created (TYPE = SERVICE)
-  ☐ Public key set on user
-  ☐ Role created with all necessary grants
-  ☐ Role assigned to user
-  ☐ Local authentication test successful
+#### Snowflake Setup:
+  * [ ] API integration created and enabled
+  * [ ] GitHub secret created with PAT
+  * [ ] Git repository created and fetched
+  * [ ] Service account user created (TYPE = SERVICE)
+  * [ ] Public key set on user
+  * [ ] Role created with all necessary grants
+  * [ ] Role assigned to user
+  * [ ] Local authentication test successful
 
-GitHub Setup:
-  ☐ All secrets added to repository
-  ☐ Workflow file created in .github/workflows/
-  ☐ Notebook names match in workflow and repository
-  ☐ Branch names correct in workflow
+#### GitHub Setup:
+  * [ ] All secrets added to repository
+  * [ ] Workflow file created in .github/workflows/
+  * [ ] Notebook names match in workflow and repository
+  * [ ] Branch names correct in workflow
 
-Testing:
-  ☐ Local CLI test successful
-  ☐ Workflow triggered successfully
-  ☐ All notebooks executed without errors
-  ☐ Workflow completes with green checkmark
+#### Testing:
+  * [ ] Local CLI test successful
+  * [ ] Workflow triggered successfully
+  * [ ] All notebooks executed without errors
+  * [ ] Workflow completes with green checkmark
 
 
 ## SUMMARY: KEY CONCEPTS
