@@ -519,15 +519,15 @@ snow sql -q "SHOW GRANTS TO ROLE github_actions_role" -x
 
 ## SUPPORT RESOURCES
 
-Snowflake Git Integration:
+#### Snowflake Git Integration:
 https://docs.snowflake.com/en/developer-guide/git/git-overview
 
-Snowflake CLI Reference:
+#### Snowflake CLI Reference:
 https://docs.snowflake.com/en/developer-guide/snowflake-cli
 
-GitHub Actions:
+#### GitHub Actions:
 https://docs.github.com/en/actions
 
-Snowflake CLI Action:
+#### Snowflake CLI Action:
 https://github.com/snowflakedb/snowflake-cli-action
 
