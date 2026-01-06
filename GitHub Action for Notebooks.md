@@ -185,18 +185,26 @@ Ensure your repository has this structure:
 
 ```
 your-repo/ 
-├── ANALYSIS/← Folder per notebook
+│
+├── ANALYSIS/
 │   ├── ANALYSIS.ipynb
 │   └── metadata.json
 │   └── utility.py
-├── ETL_PIPELINE/← Another folder
+├── ETL_PIPELINE/
 │   ├── ETL_PIPELINE.ipynb
 │   └── config.py
 └── DATA_PROCESSING/
 │   ├── DATA_PROCESSING.ipynb
 │   └── metadata.json
+│
+├── .github/
+│   └── workflows/
+│       └── test-notebooks.yml
 └── README.md
 ```
+Each notebook resides in its own folder to organize related dependencies together. This structure allows notebooks to coexist with supporting files like utility scripts, configuration files, and metadata in a single location, making dependency management cleaner and enabling modular code reuse. When Snowflake's Git integration fetches the repository, it can access both the notebook and its dependencies from the same path.  
+
+The GitHub Actions YAML file automates continuous integration and testing. When code is pushed or pull requests are created, it triggers automated workflows that sync the repository to Snowflake, execute notebooks using Snowflake CLI, and report test results—ensuring notebooks run successfully before merging changes into production.
 
 Step 10: Configure GitHub Secrets
 ----------------------------------
