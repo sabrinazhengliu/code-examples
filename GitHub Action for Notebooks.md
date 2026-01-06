@@ -73,49 +73,7 @@ SHOW FILES IN @mydb.public.notebooks_repo/branches/main/;
 LS @mydb.public.notebooks_repo/branches/main/notebooks/;
 ```
 
-Step 5: Generate Key Pair for Service Account
-----------------------------------------------
--- Run on your local machine (not in Snowflake)
-
-```
-# Generate private key (2048-bit RSA)
-openssl genrsa -out snowflake_github_actions.pem 2048
-
-# Generate public key
-openssl rsa -in snowflake_github_actions.pem -pubout -out snowflake_github_actions.pub
-
-# Extract public key for Snowflake (remove headers/newlines)
-grep -v "BEGIN\|END" snowflake_github_actions.pub | tr -d '\n'
-
-# Save output - you'll use this in next step
-
-# Extract private key for GitHub secret (remove headers/newlines)
-grep -v "BEGIN\|END\|PRIVATE" snowflake_github_actions.pem | tr -d '\n'
-
-# Save output - you'll add this to GitHub secrets
-```
-
-Step 6: Create Service Account User
-------------------------------------
-```sql
-USE ROLE ACCOUNTADMIN;
-
--- Create service account for GitHub Actions
-CREATE USER IF NOT EXISTS github_actions_user
-  TYPE = SERVICE
-  DEFAULT_ROLE = github_actions_role
-  COMMENT = 'Service account for GitHub Actions CI/CD';
-
--- Set public key (replace with your actual public key from Step 5)
-ALTER USER github_actions_user 
-  SET RSA_PUBLIC_KEY = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...';
-
--- Verify user creation
-SHOW USERS LIKE 'github_actions_user';
-DESC USER github_actions_user;
-```
-
-Step 7: Create and Configure Role
+Step 5: Create and Configure Role
 ----------------------------------
 ```
 -- Create role for GitHub Actions
@@ -144,6 +102,39 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA mydb.public
 
 -- Grant API integration usage (needed for Git operations)
 GRANT USAGE ON INTEGRATION github_integration TO ROLE github_actions_role;
+```
+
+Step 6: Generate Key Pair for Service Account
+----------------------------------------------
+-- Run on your local machine (not in Snowflake)
+
+```
+# Generate private key (2048-bit RSA)
+openssl genrsa -out snowflake_github_actions.pem 2048
+
+# Generate public key
+openssl rsa -in snowflake_github_actions.pem -pubout -out snowflake_github_actions.pub
+
+# Extract public key for Snowflake (remove headers/newlines)
+grep -v "BEGIN\|END" snowflake_github_actions.pub | tr -d '\n'
+
+# Save output - you'll use this in next step
+
+# Extract private key for GitHub secret (remove headers/newlines)
+grep -v "BEGIN\|END\|PRIVATE" snowflake_github_actions.pem | tr -d '\n'
+
+# Save output - you'll add this to GitHub secrets
+```
+
+Step 7: Create Service Account User
+------------------------------------
+```sql
+USE ROLE ACCOUNTADMIN;
+
+-- Create service account for GitHub Actions
+CREATE USER IF NOT EXISTS github_actions_user
+  TYPE = SERVICE
+  COMMENT = 'Service account for GitHub Actions CI/CD';
 
 -- Assign role to user
 GRANT ROLE github_actions_role TO USER github_actions_user;
@@ -151,6 +142,18 @@ GRANT ROLE github_actions_role TO USER github_actions_user;
 -- Verify grants
 SHOW GRANTS TO ROLE github_actions_role;
 SHOW GRANTS TO USER github_actions_user;
+
+-- Set default role for service account user
+ALTER USER github_actions_user
+  DEFAULT_ROLE = github_actions_role;
+
+-- Set public key (replace with your actual public key from Step 5)
+ALTER USER github_actions_user 
+  SET RSA_PUBLIC_KEY = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...';
+
+-- Verify user creation
+SHOW USERS LIKE 'github_actions_user';
+DESC USER github_actions_user;
 ```
 
 Step 8: Test Service Account Authentication
@@ -182,16 +185,16 @@ Ensure your repository has this structure:
 
 ```
 your-repo/                                                                                                                                                                 
-├── notebooks/                                                                                                                                                             
-│   ├── ANALYSIS/                    ← Folder per notebook                                                                                                                 
-│   │   ├── notebook.ipynb                                                                                                                                                 
-│   │   └── metadata.json                                                                                                                                                  
-│   ├── ETL_PIPELINE/                ← Another folder                                                                                                                      
-│   │   ├── notebook.ipynb
-│   │   └── metadata.json                                                                                                                                                  
-│   └── DATA_PROCESSING/                                                                                                                                                   
-│       ├── notebook.ipynb                                                                                                                                                 
-│       └── metadata.json                     
+├── ANALYSIS/                ← Folder per notebook                                                                                                                 
+│   ├── ANALYSIS.ipynb                                                                                                                                                 
+│   └── metadata.json
+│   └── utility.py                                                                                                                                                  
+├── ETL_PIPELINE/            ← Another folder                                                                                                                      
+│   ├── ETL_PIPELINE.ipynb
+│   └── config.py                                                                                                                                                
+└── DATA_PROCESSING/                                                                                                                                                   
+│   ├── DATA_PROCESSING.ipynb                                                                                                                                                 
+│   └── metadata.json                     
 └── README.md
 ```
 
