@@ -204,7 +204,7 @@ your-repo/
 ```
 Each notebook resides in its own folder to organize related dependencies together. This structure allows notebooks to coexist with supporting files like utility scripts, configuration files, and metadata in a single location, making dependency management cleaner and enabling modular code reuse. When Snowflake's Git integration fetches the repository, it can access both the notebook and its dependencies from the same path.  
 
-The GitHub Actions YAML file automates continuous integration and testing. When code is pushed or pull requests are created, it triggers automated workflows that sync the repository to Snowflake, execute notebooks using Snowflake CLI, and report test results—ensuring notebooks run successfully before merging changes into production.
+The GitHub Actions YAML file automates continuous integration and testing. When notebook is pushed to a non-prod branch, it triggers automated workflows that sync the repository to Snowflake, execute notebooks using Snowflake CLI, and report test results—ensuring notebooks run successfully before merging changes into production.
 
 Step 10: Configure GitHub Secrets
 ----------------------------------
@@ -212,26 +212,19 @@ Step 10: Configure GitHub Secrets
 2. Click "New repository secret"
 3. Add the following secrets:
 
-* Secret Name: SNOWFLAKE_ACCOUNT
-   * Value: abc12345.us-east-1
 
-* Secret Name: SNOWFLAKE_USER
-   * Value: github_actions_user
-
-* Secret Name: SNOWFLAKE_PRIVATE_KEY_RAW
-   * Value: (paste the private key string from Step 5 - without headers/newlines)
-
-* Secret Name: SNOWFLAKE_DATABASE
-   * Value: MYDB
-
-* Secret Name: SNOWFLAKE_SCHEMA
-   * Value: PUBLIC
-
-* Secret Name: SNOWFLAKE_WAREHOUSE
-   * Value: COMPUTE_WH
-
-* Secret Name: SNOWFLAKE_GIT_REPO
-   * Value: mydb.public.notebooks_repo
+| Secret Name | Secrect Value | 
+| - | - | 
+| SNOWFLAKE_ACCOUNT | abc12345.us-east-1 |
+| SNOWFLAKE_USER | github_actions_user |
+| SNOWFLAKE_PRIVATE_KEY_RAW | (paste the private key string from Step 5 - without headers/newlines) |
+| SNOWFLAKE_TEST_DATABASE | DEV_DB |
+| SNOWFLAKE_TEST_SCHEMA | PUBLIC |
+| SNOWFLAKE_TEST_WAREHOUSE | TEST_WH |
+| SNOWFLAKE_PROD_DATABASE | PROD_DB |
+| SNOWFLAKE_PROD_SCHEMA | PUBLIC |
+| SNOWFLAKE_PROD_WAREHOUSE | PROD_WH |
+| SNOWFLAKE_GIT_REPO | DEV_DB.REPO.NOTEBOOKS_REPO |
 
 Step 11: Create GitHub Actions Workflow
 ----------------------------------------
@@ -292,9 +285,9 @@ jobs:
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_AUTHENTICATOR: SNOWFLAKE_JWT
           SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
+          SNOWFLAKE_TEST_SCHEMA: ${{ secrets.SNOWFLAKE_TEST_SCHEMA }}
+          SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
         run: |
           NOTEBOOKS=("ANALYSIS" "ETL_PIPELINE" "DATA_PROCESSING")
           failed_notebooks=()
@@ -306,9 +299,9 @@ jobs:
               EXECUTE NOTEBOOK FROM 
                 '@${{ secrets.SNOWFLAKE_GIT_REPO }}/branches/${{ github.ref_name }}/${notebook}/${notebook}.ipynb'
             " \
-              --database "$SNOWFLAKE_DATABASE" \
-              --schema "$SNOWFLAKE_SCHEMA" \
-              --warehouse "$SNOWFLAKE_WAREHOUSE" \
+              --database "$SNOWFLAKE_TEST_DATABASE" \
+              --schema "$SNOWFLAKE_TEST_SCHEMA" \
+              --warehouse "$SNOWFLAKE_TEST_WAREHOUSE" \
               -x; then
               echo "✅ SUCCESS: $notebook"
             else
@@ -362,7 +355,7 @@ jobs:
           SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
           SNOWFLAKE_PROD_DATABASE: ${{ secrets.SNOWFLAKE_PROD_DATABASE }}
           SNOWFLAKE_PROD_SCHEMA: ${{ secrets.SNOWFLAKE_PROD_SCHEMA }}
-          SNOWFLAKE_RUNTIME_WAREHOUSE: ${{ secrets.SNOWFLAKE_RUNTIME_WAREHOUSE }}
+          SNOWFLAKE_PROD_WAREHOUSE: ${{ secrets.SNOWFLAKE_PROD_WAREHOUSE }}
           SNOWFLAKE_GIT_REPO: ${{ secrets.SNOWFLAKE_GIT_REPO }}
         run: |
           echo "Recreating notebooks in production from main branch..."
@@ -377,7 +370,7 @@ jobs:
                 ${SNOWFLAKE_PROD_DATABASE}.${SNOWFLAKE_PROD_SCHEMA}.${notebook} 
               FROM 
                 '@${{ secrets.SNOWFLAKE_GIT_REPO }}/branches/main/${notebook}/${notebook}.ipynb' 
-              WAREHOUSE = ${SNOWFLAKE_RUNTIME_WAREHOUSE}
+              WAREHOUSE = ${SNOWFLAKE_PROD_WAREHOUSE}
             " -x
             
             echo "✅ Deployed: $notebook to production"
