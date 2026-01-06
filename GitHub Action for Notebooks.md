@@ -235,30 +235,33 @@ Step 10: Configure GitHub Secrets
 
 Step 11: Create GitHub Actions Workflow
 ----------------------------------------
-Create file: .github/workflows/test-notebooks.yml
-
 ```yaml
-name: Test Snowflake Notebooks
+name: Test and Deploy Snowflake Notebooks on Push to Non-Prod Branch
 
 on:
   push:
-    branches: [main, develop]
-    paths:
-      - 'notebooks/**'
-  pull_request:
-    branches: [main]
-  workflow_dispatch:  # Manual trigger
+    branches-ignore:
+      - main  # Trigger on push to any branch except main
+  workflow_dispatch:
 
 jobs:
-  test-notebooks:
-    runs-on: ubuntu-latest
-    
+  test-and-deploy:
+    runs-on: ubuntu-latest  # Use Ubuntu runner for speed and compatibility with Snowflake CLI
+    # alternatively, provide your own VM with private connectivity with Snowflake
+    # register your custom VM with GitHub as a runner
+
     steps:
+      # Step 1: Clone the repository to access notebook files in runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Snowflake CLI for executing SQL and notebook commands
       - name: Setup Snowflake CLI
         uses: snowflakedb/snowflake-cli-action@v2.0
         with:
           cli-version: "3.11.0"
 
+      # Step 3: Verify service account can authenticate to Snowflake using key pair
       - name: Test Snowflake connection
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -269,6 +272,7 @@ jobs:
           echo "Testing connection to Snowflake..."
           snow connection test -x
 
+      # Step 4: Fetch latest changes from GitHub to Snowflake Git repository
       - name: Sync Git repository
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -277,38 +281,31 @@ jobs:
           SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
           SNOWFLAKE_GIT_REPO: ${{ secrets.SNOWFLAKE_GIT_REPO }}
         run: |
-          echo "Syncing Git repository with latest changes..."
+          echo "Syncing Git repository..."
           snow sql -q "ALTER GIT REPOSITORY $SNOWFLAKE_GIT_REPO FETCH" -x
-          
-          echo "Listing notebooks in repository..."
-          snow sql -q "LS @$SNOWFLAKE_GIT_REPO/branches/main/notebooks/" -x
 
-      - name: Execute notebooks from Git repository
+      # Step 5: Execute notebooks from pushed branch to verify they run without errors
+      - name: Execute notebooks for testing
+        id: test_notebooks
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_AUTHENTICATOR: SNOWFLAKE_JWT
           SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
-          SNOWFLAKE_GIT_REPO: ${{ secrets.SNOWFLAKE_GIT_REPO }}
           SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
           SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
           SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
         run: |
-          # Define notebooks to test
-          NOTEBOOKS=(
-            "analysis"
-            "etl_pipeline"
-            "data_processing"
-          )
-          
+          NOTEBOOKS=("ANALYSIS" "ETL_PIPELINE" "DATA_PROCESSING")
           failed_notebooks=()
           
           for notebook in "${NOTEBOOKS[@]}"; do
-            echo "=========================================="
-            echo "Executing: $notebook"
-            echo "=========================================="
-
-            if snow sql -q "EXECUTE NOTEBOOK ${notebook}"
+            echo "Testing: $notebook"
+            
+            if snow sql -q "
+              EXECUTE NOTEBOOK FROM 
+                '@${{ secrets.SNOWFLAKE_GIT_REPO }}/branches/${{ github.ref_name }}/${notebook}/${notebook}.ipynb'
+            " \
               --database "$SNOWFLAKE_DATABASE" \
               --schema "$SNOWFLAKE_SCHEMA" \
               --warehouse "$SNOWFLAKE_WAREHOUSE" \
@@ -320,29 +317,71 @@ jobs:
             fi
           done
           
-          # Report results
-          echo "=========================================="
-          echo "Test Summary"
-          echo "=========================================="
-          if [ ${#failed_notebooks[@]} -eq 0 ]; then
-            echo "✅ All notebooks passed"
-          else
-            echo "❌ Failed notebooks: ${failed_notebooks[*]}"
+          if [ ${#failed_notebooks[@]} -ne 0 ]; then
+            echo "Failed notebooks: ${failed_notebooks[*]}"
             exit 1
           fi
 
-      - name: Verify notebook execution
+      # Step 6: Create pull request if tests pass
+      - name: Create pull request
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if PR already exists
+          existing_pr=$(gh pr list --head ${{ github.ref_name }} --base main --json number --jq '.[0].number')
+          
+          if [ -z "$existing_pr" ]; then
+            echo "Creating new PR..."
+            gh pr create \
+              --base main \
+              --head ${{ github.ref_name }} \
+              --title "Auto-deploy: ${{ github.ref_name }}" \
+              --body "Automated notebook deployment from branch ${{ github.ref_name }}. All tests passed." \
+              --fill
+          else
+            echo "PR already exists: #$existing_pr"
+          fi
+
+      # Step 7: Automatically merge PR to main if tests pass
+      - name: Merge to main
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_number=$(gh pr list --head ${{ github.ref_name }} --base main --json number --jq '.[0].number')
+          gh pr merge $pr_number --merge --auto
+
+      # Step 8: Deploy notebooks to production database from main branch with runtime warehouse
+      - name: Recreate notebooks in production from main
         if: success()
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_AUTHENTICATOR: SNOWFLAKE_JWT
           SNOWFLAKE_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
-          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
-          SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+          SNOWFLAKE_PROD_DATABASE: ${{ secrets.SNOWFLAKE_PROD_DATABASE }}
+          SNOWFLAKE_PROD_SCHEMA: ${{ secrets.SNOWFLAKE_PROD_SCHEMA }}
+          SNOWFLAKE_RUNTIME_WAREHOUSE: ${{ secrets.SNOWFLAKE_RUNTIME_WAREHOUSE }}
+          SNOWFLAKE_GIT_REPO: ${{ secrets.SNOWFLAKE_GIT_REPO }}
         run: |
-          echo "Verifying notebooks in Snowflake..."
-          snow sql -q "SHOW NOTEBOOKS IN SCHEMA $SNOWFLAKE_DATABASE.$SNOWFLAKE_SCHEMA" -x
+          echo "Recreating notebooks in production from main branch..."
+          
+          NOTEBOOKS=("ANALYSIS" "ETL_PIPELINE" "DATA_PROCESSING")
+          
+          for notebook in "${NOTEBOOKS[@]}"; do
+            echo "Creating notebook: $notebook"
+            
+            snow sql -q "
+              CREATE OR REPLACE NOTEBOOK 
+                ${SNOWFLAKE_PROD_DATABASE}.${SNOWFLAKE_PROD_SCHEMA}.${notebook} 
+              FROM 
+                '@${{ secrets.SNOWFLAKE_GIT_REPO }}/branches/main/${notebook}/${notebook}.ipynb' 
+              WAREHOUSE = ${SNOWFLAKE_RUNTIME_WAREHOUSE}
+            " -x
+            
+            echo "✅ Deployed: $notebook to production"
+          done
 ```
 
 ## PART 3: TESTING AND VALIDATION
