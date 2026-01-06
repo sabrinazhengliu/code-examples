@@ -213,7 +213,7 @@ Step 10: Configure GitHub Secrets
 3. Add the following secrets:
 
 
-| Secret Name | Secrect Value | 
+| Secret Name | Secret Value | 
 | - | - | 
 | SNOWFLAKE_ACCOUNT | abc12345.us-east-1 |
 | SNOWFLAKE_USER | github_actions_user |
