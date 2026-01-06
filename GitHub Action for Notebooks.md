@@ -319,7 +319,7 @@ jobs:
       - name: Create pull request
         if: success()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # provided by GitHub, no need to create
         run: |
           # Check if PR already exists
           existing_pr=$(gh pr list --head ${{ github.ref_name }} --base main --json number --jq '.[0].number')
