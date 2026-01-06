@@ -418,28 +418,23 @@ Go to: https://github.com/your-org/your-project/actions
 Step 14: Troubleshooting
 -------------------------
 * **Issue: Authentication failed**
-* Solution: 
   - Verify public key is set on user
   - Check private key in GitHub secrets has no headers/newlines
   - Run: DESC USER github_actions_user; (verify RSA_PUBLIC_KEY is set)
 
 * **Issue: Permission denied on Git repository**
-* Solution:
   - Check grants: SHOW GRANTS TO ROLE github_actions_role;
   - Grant READ access: GRANT READ ON GIT REPOSITORY mydb.public.notebooks_repo TO ROLE github_actions_role;
 
 * **Issue: Git repository not found**
-* Solution:
   - Verify repo exists: SHOW GIT REPOSITORIES;
   - Check spelling of SNOWFLAKE_GIT_REPO secret
 
 * **Issue: Notebook not found in Git repo**
-* Solution:
   - List files: LS @mydb.public.notebooks_repo/branches/main/notebooks/;
   - Ensure path matches: @repo/branches/main/notebooks/file.ipynb
 
 * **Issue: Warehouse suspended**
-* Solution:
   - Add auto-resume: ALTER WAREHOUSE compute_wh SET AUTO_RESUME = TRUE;
   - Or resume manually: ALTER WAREHOUSE compute_wh RESUME;
 
@@ -573,4 +568,3 @@ https://docs.github.com/en/actions
 
 * Snowflake CLI Action:
 https://github.com/snowflakedb/snowflake-cli-action
-
