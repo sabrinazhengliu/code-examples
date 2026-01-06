@@ -184,17 +184,17 @@ Step 9: Repository Structure
 Ensure your repository has this structure:
 
 ```
-your-repo/                                                                                                                                                                 
-├── ANALYSIS/                ← Folder per notebook                                                                                                                 
-│   ├── ANALYSIS.ipynb                                                                                                                                                 
+your-repo/ 
+├── ANALYSIS/← Folder per notebook
+│   ├── ANALYSIS.ipynb
 │   └── metadata.json
-│   └── utility.py                                                                                                                                                  
-├── ETL_PIPELINE/            ← Another folder                                                                                                                      
+│   └── utility.py
+├── ETL_PIPELINE/← Another folder
 │   ├── ETL_PIPELINE.ipynb
-│   └── config.py                                                                                                                                                
-└── DATA_PROCESSING/                                                                                                                                                   
-│   ├── DATA_PROCESSING.ipynb                                                                                                                                                 
-│   └── metadata.json                     
+│   └── config.py
+└── DATA_PROCESSING/
+│   ├── DATA_PROCESSING.ipynb
+│   └── metadata.json
 └── README.md
 ```
 
