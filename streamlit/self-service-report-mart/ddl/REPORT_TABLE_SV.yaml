@@ -1,0 +1,394 @@
+name: REPORT_TABLE_SV
+description: "A demo report table for semantic view demonstration, containing report tracking data with financial metrics, categorical dimensions, and temporal attributes."
+tables:
+  - name: REPORT_TABLE
+    base_table:
+      database: <database>
+      schema: <schema>
+      table: REPORT_TABLE
+    dimensions:
+      - name: ASSIGNED_TO
+        description: The person or team member assigned to the report record.
+        expr: ASSIGNED_TO
+        data_type: VARCHAR(255)
+        aliases:
+          - assignee
+          - owner
+          - assigned person
+      - name: CATEGORY
+        description: "The functional category of the record such as Marketing, Engineering, HR, Sales, etc."
+        expr: CATEGORY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Marketing
+          - Support
+          - Engineering
+          - HR
+          - Sales
+          - Operations
+          - Finance
+          - Legal
+        aliases:
+          - function
+          - business unit
+          - group
+      - name: COUNTRY_CODE
+        description: Three-letter ISO country code indicating the country of origin for the record.
+        expr: COUNTRY_CODE
+        data_type: VARCHAR(3)
+        sample_values:
+          - USA
+          - GBR
+          - DEU
+          - JPN
+          - BRA
+          - CAN
+          - IND
+          - AUS
+        aliases:
+          - country
+          - nation
+      - name: CUSTOMER_EMAIL
+        description: The email address of the customer associated with the record.
+        expr: CUSTOMER_EMAIL
+        data_type: VARCHAR(320)
+        aliases:
+          - email
+          - contact email
+      - name: DEPARTMENT
+        description: "The department responsible for the record, such as Business Development, Customer Success, Research, etc."
+        expr: DEPARTMENT
+        data_type: VARCHAR(100)
+        sample_values:
+          - Business Development
+          - Customer Success
+          - Quality Assurance
+          - Research
+          - Security
+          - Product Management
+          - Data Science
+          - Accounting
+          - Training
+          - DevOps
+        aliases:
+          - dept
+          - team
+          - division
+      - name: DESCRIPTION
+        description: Free-text description of the report record.
+        expr: DESCRIPTION
+        data_type: VARCHAR(16777216)
+      - name: IS_ACTIVE
+        description: Whether the record is currently active (true) or inactive/archived (false).
+        expr: IS_ACTIVE
+        data_type: BOOLEAN
+        aliases:
+          - active
+          - active flag
+      - name: NOTES
+        description: Additional notes or comments associated with the record.
+        expr: NOTES
+        data_type: VARCHAR(16777216)
+      - name: PRIORITY
+        description: "Priority level of the record, where lower numbers indicate higher priority."
+        expr: PRIORITY
+        data_type: "NUMBER(2,0)"
+        aliases:
+          - priority level
+          - urgency
+      - name: QUANTITY
+        description: The quantity or count of items associated with the record.
+        expr: QUANTITY
+        data_type: "NUMBER(38,0)"
+        aliases:
+          - qty
+          - count
+          - volume
+      - name: RATING
+        description: A numeric rating or score assigned to the record.
+        expr: RATING
+        data_type: "NUMBER(38,0)"
+        aliases:
+          - score
+          - grade
+      - name: REGION
+        description: "The geographic region for the record: NA (North America), EMEA (Europe/Middle East/Africa), APAC (Asia-Pacific), LATAM (Latin America), ANZ (Australia/New Zealand), MEA (Middle East/Africa)."
+        expr: REGION
+        data_type: VARCHAR(50)
+        sample_values:
+          - NA
+          - EMEA
+          - APAC
+          - LATAM
+          - ANZ
+          - MEA
+        aliases:
+          - geo
+          - geography
+          - territory
+      - name: REPORT_ID
+        description: Unique numeric identifier for each report record.
+        expr: REPORT_ID
+        data_type: "NUMBER(38,0)"
+        aliases:
+          - id
+          - record id
+      - name: REPORT_NAME
+        description: The name or title of the report record.
+        expr: REPORT_NAME
+        data_type: VARCHAR(255)
+        aliases:
+          - name
+          - title
+          - report title
+      - name: STATUS
+        description: "The current status of the record: Open, Pending, or Closed."
+        expr: STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Open
+          - Pending
+          - Closed
+        aliases:
+          - state
+          - record status
+    facts:
+      - name: COST
+        description: The cost or expense amount in dollars associated with the record.
+        expr: COST
+        data_type: "NUMBER(18,2)"
+        access_modifier: <schema>_access
+        aliases:
+          - expense
+          - spend
+      - name: DISCOUNT_PERCENT
+        description: "The discount percentage applied to the record, as a decimal (e.g. 0.15 = 15%)."
+        expr: DISCOUNT_PERCENT
+        data_type: FLOAT
+        access_modifier: <schema>_access
+        aliases:
+          - discount
+          - discount rate
+      - name: REVENUE
+        description: The revenue or income amount in dollars generated by the record.
+        expr: REVENUE
+        data_type: "NUMBER(18,2)"
+        access_modifier: <schema>_access
+        aliases:
+          - income
+          - sales
+          - earnings
+      - name: TAX_RATE
+        description: "The tax rate applied to the record, as a decimal (e.g. 0.08 = 8%)."
+        expr: TAX_RATE
+        data_type: FLOAT
+        access_modifier: <schema>_access
+        aliases:
+          - tax
+          - tax percentage
+      - name: TOTAL_AMOUNT
+        description: The total dollar amount for the record after all adjustments.
+        expr: TOTAL_AMOUNT
+        data_type: "NUMBER(18,2)"
+        access_modifier: <schema>_access
+        aliases:
+          - total
+          - amount
+          - net amount
+      - name: UNIT_PRICE
+        description: The price per unit in dollars.
+        expr: UNIT_PRICE
+        data_type: "NUMBER(12,4)"
+        access_modifier: <schema>_access
+        aliases:
+          - price
+          - unit cost
+      - name: WEIGHT_KG
+        description: The weight of the item in kilograms.
+        expr: WEIGHT_KG
+        data_type: FLOAT
+        access_modifier: <schema>_access
+        aliases:
+          - weight
+    time_dimensions:
+      - name: CREATED_DATE
+        description: The date when the record was originally created.
+        expr: CREATED_DATE
+        data_type: DATE
+        aliases:
+          - creation date
+          - date created
+          - create date
+      - name: START_TIME
+        description: The time of day when the record activity started.
+        expr: START_TIME
+        data_type: TIME(9)
+        aliases:
+          - start
+          - begin time
+      - name: SUBMITTED_AT
+        description: The timestamp when the record was submitted for review or processing.
+        expr: SUBMITTED_AT
+        data_type: TIMESTAMP_LTZ(9)
+        aliases:
+          - submission date
+          - submitted date
+      - name: UPDATED_TIMESTAMP
+        description: The timestamp of the most recent update to the record.
+        expr: UPDATED_TIMESTAMP
+        data_type: TIMESTAMP_NTZ(9)
+        aliases:
+          - last updated
+          - modified date
+          - update date
+verified_queries:
+  - name: TOTAL_REVENUE_BY_REGION
+    question: "What is the total revenue by region?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: true
+    sql: "SELECT REGION, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: TOTAL_REVENUE_BY_DEPARTMENT
+    question: "What is the total revenue by department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: true
+    sql: "SELECT DEPARTMENT, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: MONTHLY_REVENUE_TREND
+    question: "How does revenue trend over time by month?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: true
+    sql: "SELECT DATE_TRUNC('MONTH', CREATED_DATE) AS MONTH, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE CREATED_DATE IS NOT NULL AND REVENUE IS NOT NULL GROUP BY 1 ORDER BY 1"
+  - name: MONTHLY_COST_TREND
+    question: "How does cost trend over time by month?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DATE_TRUNC('MONTH', CREATED_DATE) AS MONTH, SUM(COST) AS TOTAL_COST FROM <database>.<schema>.REPORT_TABLE WHERE CREATED_DATE IS NOT NULL AND COST IS NOT NULL GROUP BY 1 ORDER BY 1"
+  - name: TOP_10_REGIONS_BY_REVENUE
+    question: "What are the top 10 regions by revenue?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: true
+    sql: "SELECT REGION, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 10"
+  - name: AVERAGE_COST_BY_DEPARTMENT
+    question: "What is the average cost by department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DEPARTMENT, AVG(COST) AS AVG_COST FROM <database>.<schema>.REPORT_TABLE WHERE COST IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: TOTAL_AMOUNT_BY_CATEGORY
+    question: "What is the total amount by category?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT CATEGORY, SUM(TOTAL_AMOUNT) AS TOTAL_AMOUNT FROM <database>.<schema>.REPORT_TABLE WHERE TOTAL_AMOUNT IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: REVENUE_BY_STATUS
+    question: "What is the revenue breakdown by status?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT STATUS, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: MONTHLY_REVENUE_BY_REGION
+    question: "What is the monthly revenue by region?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DATE_TRUNC('MONTH', CREATED_DATE) AS MONTH, REGION, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE CREATED_DATE IS NOT NULL AND REVENUE IS NOT NULL GROUP BY 1, 2 ORDER BY 1, 2"
+  - name: RECORD_COUNT_BY_DEPARTMENT
+    question: "How many records are there by department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DEPARTMENT, COUNT(*) AS RECORD_COUNT FROM <database>.<schema>.REPORT_TABLE GROUP BY 1 ORDER BY 2 DESC"
+  - name: AVERAGE_RATING_BY_CATEGORY
+    question: "What is the average rating by category?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT CATEGORY, AVG(RATING) AS AVG_RATING FROM <database>.<schema>.REPORT_TABLE WHERE RATING IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: REVENUE_VS_COST_BY_DEPARTMENT
+    question: "How does revenue compare to cost by department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: true
+    sql: "SELECT DEPARTMENT, SUM(REVENUE) AS TOTAL_REVENUE, SUM(COST) AS TOTAL_COST, SUM(REVENUE) - SUM(COST) AS PROFIT FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL AND COST IS NOT NULL GROUP BY 1 ORDER BY 4 DESC"
+  - name: WEEKLY_TOTAL_AMOUNT_TREND
+    question: "What is the weekly total amount trend?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DATE_TRUNC('WEEK', CREATED_DATE) AS WEEK, SUM(TOTAL_AMOUNT) AS TOTAL_AMOUNT FROM <database>.<schema>.REPORT_TABLE WHERE CREATED_DATE IS NOT NULL AND TOTAL_AMOUNT IS NOT NULL GROUP BY 1 ORDER BY 1"
+  - name: TOP_5_DEPARTMENTS_BY_COST
+    question: "What are the top 5 departments by cost?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DEPARTMENT, SUM(COST) AS TOTAL_COST FROM <database>.<schema>.REPORT_TABLE WHERE COST IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 5"
+  - name: QUANTITY_BY_REGION
+    question: "What is the total quantity by region?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT REGION, SUM(QUANTITY) AS TOTAL_QUANTITY FROM <database>.<schema>.REPORT_TABLE WHERE QUANTITY IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: REVENUE_BY_COUNTRY
+    question: "What is the total revenue by country?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT COUNTRY_CODE, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: ACTIVE_VS_INACTIVE_REVENUE
+    question: "How does revenue differ between active and inactive records?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT IS_ACTIVE, SUM(REVENUE) AS TOTAL_REVENUE, COUNT(*) AS RECORD_COUNT FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: AVG_UNIT_PRICE_BY_CATEGORY
+    question: "What is the average unit price by category?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT CATEGORY, AVG(UNIT_PRICE) AS AVG_UNIT_PRICE FROM <database>.<schema>.REPORT_TABLE WHERE UNIT_PRICE IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: TOTAL_COST_BY_REGION_AND_DEPARTMENT
+    question: "What is the total cost by region and department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT REGION, DEPARTMENT, SUM(COST) AS TOTAL_COST FROM <database>.<schema>.REPORT_TABLE WHERE COST IS NOT NULL GROUP BY 1, 2 ORDER BY 3 DESC"
+  - name: OPEN_RECORDS_BY_REGION
+    question: "How many open records are there by region?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT REGION, COUNT(*) AS OPEN_COUNT FROM <database>.<schema>.REPORT_TABLE WHERE STATUS = 'Open' GROUP BY 1 ORDER BY 2 DESC"
+  - name: AVG_DISCOUNT_BY_DEPARTMENT
+    question: "What is the average discount percentage by department?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DEPARTMENT, AVG(DISCOUNT_PERCENT) AS AVG_DISCOUNT FROM <database>.<schema>.REPORT_TABLE WHERE DISCOUNT_PERCENT IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
+  - name: HIGH_PRIORITY_RECORDS_BY_STATUS
+    question: "How many high priority records are there by status?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT STATUS, COUNT(*) AS RECORD_COUNT FROM <database>.<schema>.REPORT_TABLE WHERE PRIORITY <= 3 GROUP BY 1 ORDER BY 2 DESC"
+  - name: MONTHLY_RECORD_VOLUME
+    question: "How many records are created each month?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT DATE_TRUNC('MONTH', CREATED_DATE) AS MONTH, COUNT(*) AS RECORD_COUNT FROM <database>.<schema>.REPORT_TABLE WHERE CREATED_DATE IS NOT NULL GROUP BY 1 ORDER BY 1"
+  - name: REVENUE_BY_CATEGORY_AND_STATUS
+    question: "What is the revenue by category and status?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT CATEGORY, STATUS, SUM(REVENUE) AS TOTAL_REVENUE FROM <database>.<schema>.REPORT_TABLE WHERE REVENUE IS NOT NULL GROUP BY 1, 2 ORDER BY 3 DESC"
+  - name: TOTAL_WEIGHT_BY_REGION
+    question: "What is the total weight shipped by region?"
+    verified_at: 1713200000
+    verified_by: <user>
+    use_as_onboarding_question: false
+    sql: "SELECT REGION, SUM(WEIGHT_KG) AS TOTAL_WEIGHT_KG FROM <database>.<schema>.REPORT_TABLE WHERE WEIGHT_KG IS NOT NULL GROUP BY 1 ORDER BY 2 DESC"
